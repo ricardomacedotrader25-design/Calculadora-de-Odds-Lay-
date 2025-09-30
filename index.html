@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #242628;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -59,9 +59,17 @@
             outline: none;
             box-sizing: border-box;
             transition: border-color 0.2s ease;
+            -webkit-appearance: textfield; /* Remove setinhas no Chrome, Safari */
+            -moz-appearance: textfield;    /* Remove setinhas no Firefox */
+            appearance: textfield;         /* Padrão moderno */
         }
         .form-group input[type="number"]:focus {
             border-color: #ff9900;
+        }
+        .form-group input[type="number"]::-webkit-inner-spin-button,
+        .form-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; /* Remove setinhas no Chrome, Safari */
+            margin: 0;
         }
         .results {
             margin-top: 30px;
