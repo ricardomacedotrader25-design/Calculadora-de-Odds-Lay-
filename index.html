@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Odds Lay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px 40px;
+            width: 450px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo img {
+            width: 150px;
+        }
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 8px;
+        }
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #333333;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease;
+        }
+        .form-group input[type="number"]:focus {
+            border-color: #ff9900;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+        .result-item label {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333333;
+        }
+        .result-value {
+            font-size: 17px;
+            font-weight: 700;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .result-value.loss {
+            color: #dc3545;
+        }
+        .copy-icon {
+            background-color: #f0f2f5;
+            border-radius: 8px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .copy-icon:hover {
+            background-color: #e0e2e5;
+        }
+        .copy-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: #555555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://fulltrader.com/wp-content/uploads/2021/08/logo-Fulltrader.svg" alt="">
+        </div>
+
+        <h2>Calculadora de Odds Lay</h2>
+
+        <div class="form-group">
+            <label for="oddLay">Odd Lay</label>
+            <input type="number" id="oddLay" step="0.01" min="1">
+        </div>
+
+        <div class="form-group">
+            <label for="responsabilidadeLay">Responsabilidade Lay</label>
+            <input type="number" id="responsabilidadeLay" step="0.01" min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="oddBack">Odd Back</label>
+            <input type="number" id="oddBack" step="0.01" min="1">
+        </div>
+
+        <div class="results">
+            <div class="result-item">
+                <label>Stake de Back</label>
+                <div class="result-value">
+                    <span id="stakeBackValue">0.00</span>
+                    <div class="copy-icon" onclick="copyToClipboard('stakeBackValue')">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 4 6 4.9 6 6v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H8V6h11v14z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="result-item">
+                <label>Perda/Lucro</label>
+                <div class="result-value" id="profitLossContainer">
+                    <span id="profitLossValue">0.00 (0.00%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get elements
+        const oddLayInput = document.getElementById('oddLay');
+        const responsabilidadeLayInput = document.getElementById('responsabilidadeLay');
+        const oddBackInput = document.getElementById('oddBack');
+        const stakeBackValue = document.getElementById('stakeBackValue');
+        const profitLossValue = document.getElementById('profitLossValue');
+        const profitLossContainer = document.getElementById('profitLossContainer');
+
+        // Function to calculate and update results
+        function calculateLayBack() {
+            const oddLay = parseFloat(oddLayInput.value) || 0;
+            const responsabilidadeLay = parseFloat(responsabilidadeLayInput.value) || 0;
+            const oddBack = parseFloat(oddBackInput.value) || 0;
+
+            if (oddLay <= 1 || oddBack <= 1 || responsabilidadeLay <= 0) {
+                stakeBackValue.textContent = '0.00';
+                profitLossValue.textContent = '0.00 (0.00%)';
+                profitLossContainer.classList.remove('loss');
+                return;
+            }
+
+            // Formula validated from Fulltrader behavior:
+            // Stake de Back = (Responsabilidade Lay + (Responsabilidade Lay / (Odd Lay - 1))) / Odd Back
+            // Perda/Lucro = (Responsabilidade Lay / (Odd Lay - 1)) - Stake de Back
+            const stakeBack = (responsabilidadeLay + (responsabilidadeLay / (oddLay - 1))) / oddBack;
+            const profitLoss = (responsabilidadeLay / (oddLay - 1)) - stakeBack;
+
+            // Calculate percentage based on Responsabilidade Lay
+            let percentage = 0;
+            if (responsabilidadeLay !== 0) {
+                percentage = (profitLoss / responsabilidadeLay * 100).toFixed(2);
+            }
+
+            // Update values
+            stakeBackValue.textContent = stakeBack.toFixed(2);
+            profitLossValue.textContent = `${profitLoss.toFixed(2)} (${percentage}%)`;
+
+            // Set color based on profit/loss
+            if (profitLoss < 0) {
+                profitLossContainer.classList.add('loss');
+            } else {
+                profitLossContainer.classList.remove('loss');
+            }
+        }
+
+        // Add event listeners
+        oddLayInput.addEventListener('input', calculateLayBack);
+        responsabilidadeLayInput.addEventListener('input', calculateLayBack);
+        oddBackInput.addEventListener('input', calculateLayBack);
+
+        // Initial calculation
+        calculateLayBack();
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const textToCopy = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Copiado para a área de transferência: ' + textToCopy);
+            }).catch(err => {
+                console.error('Falha ao copiar: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
