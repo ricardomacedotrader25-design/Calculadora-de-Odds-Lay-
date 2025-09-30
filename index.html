@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Odds Lay</title>
+    <title>Calculadora de Odds Lay e Normal</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -12,11 +12,13 @@
             background-color: #242628;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
             margin: 0;
+            gap: 20px;
+            padding: 20px;
         }
-        .container {
+        .calculator-container {
             background-color: #ffffff;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -59,16 +61,16 @@
             outline: none;
             box-sizing: border-box;
             transition: border-color 0.2s ease;
-            -webkit-appearance: textfield; /* Remove setinhas no Chrome, Safari */
-            -moz-appearance: textfield;    /* Remove setinhas no Firefox */
-            appearance: textfield;         /* Padrão moderno */
+            -webkit-appearance: textfield;
+            -moz-appearance: textfield;
+            appearance: textfield;
         }
         .form-group input[type="number"]:focus {
             border-color: #ff9900;
         }
         .form-group input[type="number"]::-webkit-inner-spin-button,
         .form-group input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none; /* Remove setinhas no Chrome, Safari */
+            -webkit-appearance: none;
             margin: 0;
         }
         .results {
@@ -117,10 +119,73 @@
             height: 18px;
             fill: #555555;
         }
+        /* Estilos para a calculadora normal */
+        .normal-calculator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .normal-display {
+            width: 100%;
+            height: 70px;
+            background-color: #f0f2f5;
+            border: none;
+            border-radius: 10px;
+            font-size: 28px;
+            text-align: right;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            outline: none;
+            color: #333333;
+        }
+        .normal-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+        .normal-button {
+            padding: 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            height: 60px;
+            color: #333333; /* Cor padrão da fonte */
+        }
+        .normal-button:hover {
+            background-color: #d0d0d0;
+        }
+        .normal-button.operator {
+            background-color: #ff9900;
+            color: white;
+        }
+        .normal-button.operator:hover {
+            background-color: #e68a00;
+        }
+        .normal-button.equals {
+            background-color: #28A745;
+            color: white;
+            grid-column: span 2;
+        }
+        .normal-button.equals:hover {
+            background-color: #218838;
+        }
+        /* Estilo específico para C, % e Backspace */
+        .normal-button.special {
+            background-color: #a6a6a6;
+            color: white; /* Fonte branca */
+        }
+        .normal-button.special:hover {
+            background-color: #949494;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="calculator-container">
         <div class="logo">
             <img src="lay-calculator-icon.png" alt="">
         </div>
@@ -163,6 +228,34 @@
         </div>
     </div>
 
+    <div class="calculator-container normal-calculator">
+        <!-- Título já removido anteriormente -->
+        
+        <input type="text" id="normalDisplay" class="normal-display" readonly>
+
+        <div class="normal-buttons">
+            <button class="normal-button special" onclick="clearDisplay()">C</button>
+            <button class="normal-button special operator" onclick="appendToDisplay('%')">%</button>
+            <button class="normal-button special" onclick="correctDisplay()">⌫</button>
+            <button class="normal-button operator" onclick="appendToDisplay('/')">÷</button>
+            <button class="normal-button" onclick="appendToDisplay('7')">7</button>
+            <button class="normal-button" onclick="appendToDisplay('8')">8</button>
+            <button class="normal-button" onclick="appendToDisplay('9')">9</button>
+            <button class="normal-button operator" onclick="appendToDisplay('*')">×</button>
+            <button class="normal-button" onclick="appendToDisplay('4')">4</button>
+            <button class="normal-button" onclick="appendToDisplay('5')">5</button>
+            <button class="normal-button" onclick="appendToDisplay('6')">6</button>
+            <button class="normal-button operator" onclick="appendToDisplay('-')">-</button>
+            <button class="normal-button" onclick="appendToDisplay('1')">1</button>
+            <button class="normal-button" onclick="appendToDisplay('2')">2</button>
+            <button class="normal-button" onclick="appendToDisplay('3')">3</button>
+            <button class="normal-button operator" onclick="appendToDisplay('+')">+</button>
+            <button class="normal-button" onclick="appendToDisplay('0')">0</button>
+            <button class="normal-button" onclick="appendToDisplay('.')">.</button>
+            <button class="normal-button equals" onclick="calculateResult()">=</button>
+        </div>
+    </div>
+
     <script>
         // Get elements
         const oddLayInput = document.getElementById('oddLay');
@@ -171,8 +264,9 @@
         const stakeBackValue = document.getElementById('stakeBackValue');
         const profitLossValue = document.getElementById('profitLossValue');
         const profitLossContainer = document.getElementById('profitLossContainer');
+        const normalDisplay = document.getElementById('normalDisplay');
 
-        // Function to calculate and update results
+        // Function to calculate Odds Lay
         function calculateLayBack() {
             const oddLay = parseFloat(oddLayInput.value) || 0;
             const responsabilidadeLay = parseFloat(responsabilidadeLayInput.value) || 0;
@@ -218,6 +312,56 @@
             }
         }
 
+        // Functions for normal calculator
+        function appendToDisplay(value) {
+            normalDisplay.value += value;
+        }
+
+        function clearDisplay() {
+            normalDisplay.value = '';
+        }
+
+        function correctDisplay() {
+            normalDisplay.value = normalDisplay.value.slice(0, -1);
+        }
+
+        function calculateResult() {
+            try {
+                let expression = normalDisplay.value;
+                // Procurar por padrões como "número operador número%"
+                const percentMatch = expression.match(/(\d+(?:\.\d+)?)\s*([+\-×÷])\s*(\d+(?:\.\d+)?)%$/);
+                if (percentMatch) {
+                    const baseNumber = parseFloat(percentMatch[1]);
+                    const operator = percentMatch[2];
+                    const percentValue = parseFloat(percentMatch[3]) / 100;
+                    let result;
+                    switch (operator) {
+                        case '+':
+                            result = baseNumber + (baseNumber * percentValue);
+                            break;
+                        case '-':
+                            result = baseNumber - (baseNumber * percentValue);
+                            break;
+                        case '×':
+                            result = baseNumber * percentValue;
+                            break;
+                        case '÷':
+                            if (percentValue === 0) throw new Error("Divisão por zero");
+                            result = baseNumber / percentValue;
+                            break;
+                    }
+                    normalDisplay.value = result || 0;
+                    return;
+                }
+                // Caso não haja %, avaliar normalmente
+                expression = expression.replace(/×/g, '*').replace(/÷/g, '/');
+                normalDisplay.value = eval(expression) || 0;
+            } catch (e) {
+                normalDisplay.value = 'Erro';
+                setTimeout(clearDisplay, 1000); // Limpa após 1 segundo se houver erro
+            }
+        }
+
         // Add event listeners
         oddLayInput.addEventListener('input', calculateLayBack);
         responsabilidadeLayInput.addEventListener('input', calculateLayBack);
@@ -231,11 +375,10 @@
             const element = document.getElementById(elementId);
             const textToCopy = element.textContent;
             navigator.clipboard.writeText(textToCopy).then(() => {
-                // Optional: Add a visual feedback (e.g., highlight the copied element)
                 element.style.backgroundColor = '#d4edda';
                 setTimeout(() => {
                     element.style.backgroundColor = '';
-                }, 1000); // Reset after 1 second
+                }, 1000);
             }).catch(err => {
                 console.error('Falha ao copiar: ', err);
             });
