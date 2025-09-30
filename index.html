@@ -209,11 +209,16 @@
         // Initial calculation
         calculateLayBack();
 
-        // Copy to clipboard function
+        // Updated copy to clipboard function
         function copyToClipboard(elementId) {
-            const textToCopy = document.getElementById(elementId).textContent;
+            const element = document.getElementById(elementId);
+            const textToCopy = element.textContent;
             navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Copiado para a área de transferência: ' + textToCopy);
+                // Optional: Add a visual feedback (e.g., highlight the copied element)
+                element.style.backgroundColor = '#d4edda';
+                setTimeout(() => {
+                    element.style.backgroundColor = '';
+                }, 1000); // Reset after 1 second
             }).catch(err => {
                 console.error('Falha ao copiar: ', err);
             });
