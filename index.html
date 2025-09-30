@@ -83,7 +83,7 @@
         .result-value {
             font-size: 17px;
             font-weight: 700;
-            color: #28a745;
+            color: #28A745;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -168,7 +168,16 @@
         function calculateLayBack() {
             const oddLay = parseFloat(oddLayInput.value) || 0;
             const responsabilidadeLay = parseFloat(responsabilidadeLayInput.value) || 0;
-            const oddBack = parseFloat(oddBackInput.value) || 0;
+            let oddBack = parseFloat(oddBackInput.value) || 0;
+
+            // Substitui "1" por "1.000001" no campo Odd Back
+            if (oddBack === 1) {
+                oddBack = 1.000001;
+            }
+            // Substitui "1000" por "10001" no campo Odd Back
+            if (oddBack === 1000) {
+                oddBack = 10001;
+            }
 
             if (oddLay <= 1 || oddBack <= 1 || responsabilidadeLay <= 0) {
                 stakeBackValue.textContent = '0.00';
