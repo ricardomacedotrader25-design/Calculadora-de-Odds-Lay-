@@ -1,388 +1,432 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Odds Lay e Normal</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Simulador de Trading - Hedge Ajustado Final</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
+        /* Variáveis de Cor */
+        :root {
+            --bg-body: #0e151d;
+            --bg-panel: #1e242b;
+            --bg-header: #24303c;
+            --text-white: #ffffff;
+            --blue-back-solid: #8FD3FC;
+            --pink-lay-solid: #FECDD8;
+            --black-font: #000000; 
+            --yellow-cashout: #ffc800;
+            
+            /* ALTERADO: Valor R$ principal (tabela e rodapé R$) agora é #1e7b16 */
+            --green-positive: #1e7b16; 
+            
+            /* Valor R$ para o Cashout do Topo (Mantido: #1e7b16) */
+            --green-positive-top: #1e7b16; 
+            
+            --red-negative: #ff2d2d;
+            --neutral-text: #ddd;
+            --border-color: #2c3b47;
+            --input-bg-default: #2d3844; 
+            --input-stake-text: var(--text-white);
+            --button-color: #3b4d63;
+            --button-hover: #4d6077;
+            
+            /* Porcentagem positiva do rodapé (Mantido: #1e7b16) */
+            --green-darker-footer: #1e7b16; 
+            --red-lighter-footer: #ff6666; 
+            --gray-footer-label: #848484; 
+        }
+
+        * { box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; outline: none; }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #242628;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            margin: 0;
-            gap: 20px;
-            padding: 20px;
-        }
-        .calculator-container {
-            background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            padding: 30px 40px;
-            width: 450px;
-            max-width: 90%;
-            box-sizing: border-box;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .logo img {
-            width: 150px;
-        }
-        h2 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #333333;
-            margin-bottom: 25px;
-            text-align: left;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 16px;
-            font-weight: 600;
-            color: #333333;
-            margin-bottom: 8px;
-        }
-        .form-group input[type="number"] {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            color: #333333;
-            outline: none;
-            box-sizing: border-box;
-            transition: border-color 0.2s ease;
-            -webkit-appearance: textfield;
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-        .form-group input[type="number"]:focus {
-            border-color: #ff9900;
-        }
-        .form-group input[type="number"]::-webkit-inner-spin-button,
-        .form-group input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .results {
-            margin-top: 30px;
-        }
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .result-item:last-child {
-            margin-bottom: 0;
-        }
-        .result-item label {
-            font-size: 17px;
-            font-weight: 600;
-            color: #333333;
-        }
-        .result-value {
-            font-size: 17px;
-            font-weight: 700;
-            color: #28A745;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .result-value.loss {
-            color: #dc3545;
-        }
-        .copy-icon {
-            background-color: #f0f2f5;
-            border-radius: 8px;
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .copy-icon:hover {
-            background-color: #e0e2e5;
-        }
-        .copy-icon svg {
-            width: 18px;
-            height: 18px;
-            fill: #555555;
-        }
-        /* Estilos para a calculadora normal */
-        .normal-calculator {
+            background-color: var(--bg-body);
+            color: var(--text-white);
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        .normal-display {
-            width: 100%;
-            height: 70px;
-            background-color: #f0f2f5;
-            border: none;
-            border-radius: 10px;
-            font-size: 28px;
-            text-align: right;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-            outline: none;
-            color: #333333;
-        }
-        .normal-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            width: 100%;
-        }
-        .normal-button {
             padding: 20px;
-            font-size: 20px;
+            margin: 0;
+        }
+        
+        .top-settings-wrapper { width: 850px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-end; }
+        
+        .controls-area { display: flex; align-items: center; }
+
+        .clear-button {
+            background-color: var(--button-color);
+            color: var(--text-white);
             border: none;
-            border-radius: 10px;
-            background-color: #e0e0e0;
+            padding: 8px 12px;
+            margin-right: 20px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            height: 60px;
-            color: #333333; /* Cor padrão da fonte */
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.2s;
         }
-        .normal-button:hover {
-            background-color: #d0d0d0;
+        .clear-button:hover {
+            background-color: var(--button-hover);
         }
-        .normal-button.operator {
-            background-color: #ff9900;
-            color: white;
+        
+        .summary-wrapper { display: flex; align-items: flex-end; }
+        .risk-area { text-align: right; margin-right: 20px; font-size: 14px; color: #fff; padding-bottom: 5px; }
+        .risk-label { display: block; color: var(--neutral-text); margin-bottom: 2px; font-size: 12px; }
+        
+        /* Estilo do Painel Cashout (Caixa Amarela do Topo) */
+        .cashout-box { 
+            background-color: var(--yellow-cashout); 
+            color: #000; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            text-align: center; 
+            min-width: 160px; 
+            border: 1px solid #e0b000; 
         }
-        .normal-button.operator:hover {
-            background-color: #e68a00;
+        
+        .cashout-title { 
+            font-size: 16px; 
+            font-weight: bold; 
+            display: block; 
+            color: var(--black-font); 
         }
-        .normal-button.equals {
-            background-color: #28A745;
-            color: white;
-            grid-column: span 2;
+        
+        .cashout-profit { 
+            font-size: 18px; 
+            font-weight: bold; 
+            display: block; 
         }
-        .normal-button.equals:hover {
-            background-color: #218838;
+
+        /* Cores do Valor (Topo e Tabela) */
+        /* O valor positivo na tabela e no rodapé agora usa #1e7b16 (definido em --green-positive) */
+        .value-pos { color: var(--green-positive); font-weight: bold; } 
+        .value-neg { color: var(--red-negative); font-weight: bold; } 
+
+        /* SOBRESCRITA: Mantida, mas usando o mesmo valor de --green-positive, apenas por segurança de escopo. */
+        #total-pl-display.value-pos {
+            color: var(--green-positive-top);
         }
-        /* Estilo específico para C, % e Backspace */
-        .normal-button.special {
-            background-color: #a6a6a6;
-            color: white; /* Fonte branca */
+        
+        .settings-area { margin-left: 15px; font-size: 18px; color: #889; cursor: pointer; padding-bottom: 5px; }
+
+        /* --- TABELA E HEADERS --- */
+        .main-content { display: flex; gap: 20px; width: 850px; } 
+        .market-container { width: 850px; } 
+        .market-header { background: #121a23; padding: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; color: #fff; font-weight: bold; }
+        .market-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; }
+        
+        .market-table th { 
+            padding: 8px 6px; 
+            font-size: 12px; 
+            text-align: center; 
+            background: #1a232e;
+            border-bottom: 1px solid var(--border-color); 
+            height: 40px; 
+            vertical-align: middle; 
+            color: var(--text-white);
         }
-        .normal-button.special:hover {
-            background-color: #949494;
+        .market-table td { border-bottom: 1px solid var(--border-color); height: 50px; vertical-align: middle; padding: 2px; text-align: center;}
+        .score-cell { font-weight: bold; padding-left: 10px; text-align: left; }
+        
+        .header-lay-font { color: var(--pink-lay-solid); font-weight: bold; }
+        .header-back-font { color: var(--blue-back-solid); font-weight: bold; }
+
+        /* --- INPUTS --- */
+        .input-box {
+            width: 90%; height: 40px; margin: 0 auto; text-align: center; padding: 5px; 
+            border-radius: 4px; border: 1px solid #444; font-weight: bold;
+            transition: border-color 0.2s; -moz-appearance: textfield; 
         }
+        .input-box::-webkit-outer-spin-button,
+        .input-box::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .stake.input-box { 
+            background: var(--input-bg-default); 
+            color: var(--input-stake-text); 
+        }
+        .stake.input-box:focus { border-color: var(--yellow-cashout); background: #414f5f; }
+        
+        /* ESTILO PARA O CIFRÃO (R$) */
+        .stake.input-box::placeholder {
+            color: #807F7F; 
+            font-weight: bold;
+        }
+
+        .odd-input-lay, .odd-input-back { color: var(--black-font); border: 1px solid transparent; }
+        .odd-input-lay { background-color: var(--pink-lay-solid); }
+        .odd-input-back { background-color: var(--blue-back-solid); }
+
+        .odd-input-lay:focus, .odd-input-back:focus {
+            border-color: var(--yellow-cashout); box-shadow: 0 0 5px rgba(255, 200, 0, 0.5); 
+        }
+
+        /* --- Resultados P/L e Efeitos --- */
+        .value-cell { font-weight: bold; font-size: 14px; }
+        /* O trend-up agora usa --green-positive (#1e7b16) */
+        .trend-up::after { content: " ▲"; color: var(--green-positive); font-weight: 700; }
+        .trend-down::after { content: " ▼"; color: var(--red-negative); font-weight: 700; }
+        .flash-change { animation: flash 0.6s ease; }
+        @keyframes flash { 0% { background: rgba(255, 255, 0, 0.6); } 100% { background: transparent; } }
+
+        /* --- Rodapé --- */
+        .total-box { 
+            margin-top: 25px; 
+            padding: 15px; 
+            background: #121a23; 
+            border-radius: 6px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            text-align: center; 
+        }
+        /* Estilo para o texto do label "Cashout:" no rodapé */
+        .total-box .label-text {
+            color: var(--gray-footer-label); 
+            margin-right: 5px;
+        }
+
+        /* Cor da caixa positiva do Rodapé (valor R$ - usa a nova --green-positive: #1e7b16) */
+        .total-box-pos { color: var(--green-positive); }
+        .total-box-neg { color: var(--red-negative); }
+        
+        /* Estilo para a porcentagem no rodapé (Mantido: #1e7b16) */
+        .total-box .pct-value {
+            font-size: 0.8em; 
+            margin-left: 5px;
+        }
+        .total-box .pct-value.pos-footer {
+            color: var(--green-darker-footer); 
+        }
+        .total-box .pct-value.neg-footer {
+            color: var(--red-lighter-footer); 
+        }
+
     </style>
 </head>
 <body>
-    <div class="calculator-container">
-        <div class="logo">
-            <img src="lay-calculator-icon.png" alt="">
-        </div>
-
-        <h2>Calculadora de Odds Lay</h2>
-
-        <div class="form-group">
-            <label for="oddLay">Odd Lay</label>
-            <input type="number" id="oddLay" step="0.01" min="1">
-        </div>
-
-        <div class="form-group">
-            <label for="responsabilidadeLay">Responsabilidade Lay</label>
-            <input type="number" id="responsabilidadeLay" step="0.01" min="0">
-        </div>
-
-        <div class="form-group">
-            <label for="oddBack">Odd Back</label>
-            <input type="number" id="oddBack" step="0.01" min="1">
-        </div>
-
-        <div class="results">
-            <div class="result-item">
-                <label>Stake de Back</label>
-                <div class="result-value">
-                    <span id="stakeBackValue">0.00</span>
-                    <div class="copy-icon" onclick="copyToClipboard('stakeBackValue')">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 4 6 4.9 6 6v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H8V6h11v14z"/>
-                        </svg>
-                    </div>
-                </div>
+    
+    <div class="top-settings-wrapper">
+        <div class="controls-area">
+            <button class="clear-button" onclick="clearData()"><i class="fas fa-eraser"></i> Limpar Dados</button>
+            <div class="risk-area">
+                <span class="risk-label">Responsabilidade Total:</span>
+                <div id="total-stake-display" style="color:var(--neutral-text); font-weight:bold;">R$0,00</div>
             </div>
-            <div class="result-item">
-                <label>Perda/Lucro</label>
-                <div class="result-value" id="profitLossContainer">
-                    <span id="profitLossValue">0.00 (0.00%)</span>
-                </div>
+        </div>
+        
+        <div class="summary-wrapper">
+            <div class="cashout-box" id="total-box-pl">
+                <span class="cashout-title">Cashout</span>
+                <span class="cashout-profit"><span id="total-pl-display" class="profit-value value-pos">R$0,00</span></span>
+            </div>
+
+            <div class="settings-area">
+                <i class="fas fa-calculator"></i>
+                <i class="fas fa-cog"></i>
             </div>
         </div>
     </div>
+    
+    <div class="main-content">
+        <div class="market-container">
+            <div class="market-header">
+                <span><i class="fas fa-chart-line" style="color:var(--yellow-cashout)"></i> Calculadora de Cashout (Lay CS)</span>
+            </div>
+            
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th style="width:10%;">Placar</th>
+                        
+                        <th class="header-back-font" style="width:15%;">Odd Back (Atual)</th>
+                        
+                        <th class="header-lay-font" style="width:15%;">Odd Lay (Entrada)</th>
+                        
+                        <th style="width:15%;">Stake. (R$)</th>
+                        
+                        <th style="width:15%;">Atual (R$)</th>
+                        <th style="width:15%;">P/L (R$)</th>
+                        <th style="width:15%;">P/L (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+            </table>
 
-    <div class="calculator-container normal-calculator">
-        <!-- Título já removido anteriormente -->
-        
-        <input type="text" id="normalDisplay" class="normal-display" readonly>
-
-        <div class="normal-buttons">
-            <button class="normal-button special" onclick="clearDisplay()">C</button>
-            <button class="normal-button special operator" onclick="appendToDisplay('%')">%</button>
-            <button class="normal-button special" onclick="correctDisplay()">⌫</button>
-            <button class="normal-button operator" onclick="appendToDisplay('/')">÷</button>
-            <button class="normal-button" onclick="appendToDisplay('7')">7</button>
-            <button class="normal-button" onclick="appendToDisplay('8')">8</button>
-            <button class="normal-button" onclick="appendToDisplay('9')">9</button>
-            <button class="normal-button operator" onclick="appendToDisplay('*')">×</button>
-            <button class="normal-button" onclick="appendToDisplay('4')">4</button>
-            <button class="normal-button" onclick="appendToDisplay('5')">5</button>
-            <button class="normal-button" onclick="appendToDisplay('6')">6</button>
-            <button class="normal-button operator" onclick="appendToDisplay('-')">-</button>
-            <button class="normal-button" onclick="appendToDisplay('1')">1</button>
-            <button class="normal-button" onclick="appendToDisplay('2')">2</button>
-            <button class="normal-button" onclick="appendToDisplay('3')">3</button>
-            <button class="normal-button operator" onclick="appendToDisplay('+')">+</button>
-            <button class="normal-button" onclick="appendToDisplay('0')">0</button>
-            <button class="normal-button" onclick="appendToDisplay('.')">.</button>
-            <button class="normal-button equals" onclick="calculateResult()">=</button>
+            <div id="total" class="total-box"></div>
         </div>
     </div>
 
     <script>
-        // Get elements
-        const oddLayInput = document.getElementById('oddLay');
-        const responsabilidadeLayInput = document.getElementById('responsabilidadeLay');
-        const oddBackInput = document.getElementById('oddBack');
-        const stakeBackValue = document.getElementById('stakeBackValue');
-        const profitLossValue = document.getElementById('profitLossValue');
-        const profitLossContainer = document.getElementById('profitLossContainer');
-        const normalDisplay = document.getElementById('normalDisplay');
+        // --- DADOS E VARIÁVEIS ---
+        const data = ["0-1", "0-2", "1-0", "2-0"];
+        const tbody = document.getElementById("rows");
+        const totalPLDisplay = document.getElementById('total-pl-display');
+        const totalStakeDisplay = document.getElementById('total-stake-display');
+        const totalBottomBox = document.getElementById('total');
+        
+        // --- FUNÇÃO DE CÁLCULO (Hedge Lay -> Back) ---
+        function calc(lay, back, responsibility) {
+            lay = parseFloat(lay || 0);
+            back = parseFloat(back || 0);
+            responsibility = parseFloat(responsibility || 0);
+            
+            if (lay <= 1 || back <= 1 || responsibility <= 0) return { pl: 0, pct: 0, current: 0 };
 
-        // Function to calculate Odds Lay
-        function calculateLayBack() {
-            const oddLay = parseFloat(oddLayInput.value) || 0;
-            const responsabilidadeLay = parseFloat(responsabilidadeLayInput.value) || 0;
-            let oddBack = parseFloat(oddBackInput.value) || 0;
-
-            // Substitui "1" por "1.000001" no campo Odd Back
-            if (oddBack === 1) {
-                oddBack = 1.000001;
+            // 1. Lógica de Substituição de Odd Back: 1000 => 1.000.000
+            let calculatedBack = back;
+            if (back === 1000) {
+                calculatedBack = 1000000; 
             }
-            // Substitui "1000" por "10001" no campo Odd Back
-            if (oddBack === 1000) {
-                oddBack = 10001;
-            }
+            
+            // 2. Calcular a Stake de Lay (o lucro se o resultado NÃO ocorrer)
+            const stake_lay = responsibility / (lay - 1);
+            
+            // 3. Calcular o P/L Bruto (Hedge Cash Out) - Perspectiva Lay
+            const pl_bruto = stake_lay * ((calculatedBack - lay) / calculatedBack);
+            
+            // Sem comissão
+            const pl_liquido = pl_bruto;
 
-            if (oddLay <= 1 || oddBack <= 1 || responsabilidadeLay <= 0) {
-                stakeBackValue.textContent = '0.00';
-                profitLossValue.textContent = '0.00 (0.00%)';
-                profitLossContainer.classList.remove('loss');
-                return;
-            }
-
-            // Formula validated from Fulltrader behavior:
-            // Stake de Back = (Responsabilidade Lay + (Responsabilidade Lay / (Odd Lay - 1))) / Odd Back
-            // Perda/Lucro = (Responsabilidade Lay / (Odd Lay - 1)) - Stake de Back
-            const stakeBack = (responsabilidadeLay + (responsabilidadeLay / (oddLay - 1))) / oddBack;
-            const profitLoss = (responsabilidadeLay / (oddLay - 1)) - stakeBack;
-
-            // Calculate percentage based on Responsabilidade Lay
-            let percentage = 0;
-            if (responsabilidadeLay !== 0) {
-                percentage = (profitLoss / responsabilidadeLay * 100).toFixed(2);
-            }
-
-            // Update values
-            stakeBackValue.textContent = stakeBack.toFixed(2);
-            profitLossValue.textContent = `${profitLoss.toFixed(2)} (${percentage}%)`;
-
-            // Set color based on profit/loss
-            if (profitLoss < 0) {
-                profitLossContainer.classList.add('loss');
-            } else {
-                profitLossContainer.classList.remove('loss');
-            }
+            // 4. Calcular Percentual e Retorno Atual
+            const pct = (pl_liquido / responsibility) * 100;
+            const current = responsibility + pl_liquido;
+            
+            return { pl: pl_liquido, pct, current };
         }
 
-        // Functions for normal calculator
-        function appendToDisplay(value) {
-            normalDisplay.value += value;
-        }
+        // --- RENDERIZAÇÃO DA TABELA ---
+        function render() {
+            tbody.innerHTML = "";
+            
+            data.forEach(score => {
+                const tr = document.createElement("tr");
 
-        function clearDisplay() {
-            normalDisplay.value = '';
-        }
+                tr.innerHTML = `
+                <td class="score-cell">${score}</td>
+                
+                <td><input type="number" step="0.01" class="back input-box odd-input-back" value="" placeholder="0.00" data-score="${score}"></td>
+                
+                <td><input type="number" step="0.01" class="lay input-box odd-input-lay" value="" placeholder="0.00" data-score="${score}"></td>
+                
+                <td><input type="number" step="0.01" class="stake input-box" value="" placeholder="R$0.00" data-score="${score}"></td>
+                
+                <td class="current value-cell">R$0,00</td>
+                <td class="pl value-cell">R$0,00</td>
+                <td class="pct value-cell">0.00%</td>
+                `;
 
-        function correctDisplay() {
-            normalDisplay.value = normalDisplay.value.slice(0, -1);
-        }
+                tbody.appendChild(tr);
 
-        function calculateResult() {
-            try {
-                let expression = normalDisplay.value;
-                // Procurar por padrões como "número operador número%"
-                const percentMatch = expression.match(/(\d+(?:\.\d+)?)\s*([+\-×÷])\s*(\d+(?:\.\d+)?)%$/);
-                if (percentMatch) {
-                    const baseNumber = parseFloat(percentMatch[1]);
-                    const operator = percentMatch[2];
-                    const percentValue = parseFloat(percentMatch[3]) / 100;
-                    let result;
-                    switch (operator) {
-                        case '+':
-                            result = baseNumber + (baseNumber * percentValue);
-                            break;
-                        case '-':
-                            result = baseNumber - (baseNumber * percentValue);
-                            break;
-                        case '×':
-                            result = baseNumber * percentValue;
-                            break;
-                        case '÷':
-                            if (percentValue === 0) throw new Error("Divisão por zero");
-                            result = baseNumber / percentValue;
-                            break;
+                tr.querySelectorAll("input").forEach(inp => {
+                    inp.addEventListener("input", (e) => {
+                        updateRow(tr);
+                        updateTotal();
+                    });
+                    if (inp.classList.contains('lay') || inp.classList.contains('back')) {
+                        inp.placeholder = '0.00';
                     }
-                    normalDisplay.value = result || 0;
-                    return;
-                }
-                // Caso não haja %, avaliar normalmente
-                expression = expression.replace(/×/g, '*').replace(/÷/g, '/');
-                normalDisplay.value = eval(expression) || 0;
-            } catch (e) {
-                normalDisplay.value = 'Erro';
-                setTimeout(clearDisplay, 1000); // Limpa após 1 segundo se houver erro
+                });
+            });
+            updateTotal(); 
+        }
+        
+        // --- FUNÇÃO LIMPAR DADOS ---
+        function clearData() {
+            document.querySelectorAll('tbody input').forEach(input => {
+                input.value = ''; 
+            });
+            document.querySelectorAll('tbody tr').forEach(tr => {
+                updateRow(tr); 
+            });
+            updateTotal(); 
+        }
+        window.clearData = clearData;
+
+
+        // --- ATUALIZA LINHA INDIVIDUALMENTE ---
+        function updateRow(tr) {
+            const lay = tr.querySelector('.lay').value;
+            const back = tr.querySelector('.back').value;
+            const responsibility = tr.querySelector('.stake').value;
+            
+            const { pl, pct, current } = calc(lay, back, responsibility);
+
+            const currentCell = tr.querySelector('.current');
+            const plCell = tr.querySelector('.pl');
+            const pctCell = tr.querySelector('.pct');
+            
+            animateChange(currentCell, `R$${current.toFixed(2)}`);
+            animateChange(plCell, `R$${pl.toFixed(2)}`);
+            animateChange(pctCell, `${pct.toFixed(2)}%`);
+
+            // Aqui plCell (P/L R$) usará a nova cor definida em --green-positive (#1e7b16)
+            plCell.classList.toggle('value-neg', pl < 0);
+            plCell.classList.toggle('value-pos', pl >= 0);
+            
+            const numericResponsibility = parseFloat(responsibility || 0);
+            currentCell.classList.toggle('value-neg', current < numericResponsibility); 
+            currentCell.classList.toggle('value-pos', current >= numericResponsibility);
+
+            pctCell.classList.remove('trend-up', 'trend-down');
+            if (pl > 0) pctCell.classList.add('trend-up');
+            if (pl < 0) pctCell.classList.add('trend-down');
+        }
+
+        // --- ATUALIZA TOTAIS ---
+        function updateTotal() {
+            let totalPL = 0;
+            let maxResponsibility = 0; // Variável para armazenar o MAIOR valor individual
+
+            document.querySelectorAll('tbody tr').forEach(tr => {
+                const responsibility = parseFloat(tr.querySelector('.stake').value || 0);
+                const plText = tr.querySelector('.pl').textContent.replace('R$', '').trim();
+                const pl = parseFloat(plText) || 0;
+                
+                totalPL += pl;
+                
+                // LÓGICA DE ATUALIZAÇÃO: Encontra o maior valor de responsabilidade
+                maxResponsibility = Math.max(maxResponsibility, responsibility); 
+            });
+
+            // Usa o maxResponsibility como o novo denominador para a porcentagem
+            const riskForPercentage = maxResponsibility; 
+            const pctTotal = riskForPercentage > 0 ? (totalPL / riskForPercentage) * 100 : 0;
+            const pctTotalText = `(${pctTotal.toFixed(2)}%)`;
+            const cashoutValueHtml = `R$${totalPL.toFixed(2)}`;
+
+            totalPLDisplay.textContent = cashoutValueHtml;
+            
+            // ATUALIZAÇÃO PRINCIPAL: Mostra o MAIOR VALOR INDIVIDUAL
+            totalStakeDisplay.textContent = `R$${maxResponsibility.toFixed(2)}`; 
+            
+            totalPLDisplay.classList.toggle('value-neg', totalPL < 0);
+            totalPLDisplay.classList.toggle('value-pos', totalPL >= 0);
+
+            // Cor do Rodapé
+            let pctClass = totalPL >= 0 ? 'pos-footer' : 'neg-footer';
+
+            // ATUALIZAÇÃO DO RODAPÉ com o label "Cashout:"
+            // totalBottomBox.innerHTML usa --green-positive para o R$
+            totalBottomBox.innerHTML = `<span class="label-text">Cashout:</span> <span class="${totalPL >= 0 ? 'total-box-pos' : 'total-box-neg'}">R$${totalPL.toFixed(2)}</span> <span class="pct-value ${pctClass}">${pctTotalText}</span>`;
+            totalBottomBox.classList.remove('total-box-neg', 'total-box-pos'); // Remove classes desnecessárias do container
+        }
+
+        // --- EFEITOS VISUAIS ---
+        function animateChange(element, newValue) {
+            const oldValue = element.textContent;
+            element.textContent = newValue;
+            
+            if (oldValue !== newValue) {
+                element.classList.add('flash-change');
+                setTimeout(() => element.classList.remove('flash-change'), 600);
             }
         }
 
-        // Add event listeners
-        oddLayInput.addEventListener('input', calculateLayBack);
-        responsabilidadeLayInput.addEventListener('input', calculateLayBack);
-        oddBackInput.addEventListener('input', calculateLayBack);
+        // --- INICIALIZAÇÃO ---
+        render();
 
-        // Initial calculation
-        calculateLayBack();
-
-        // Updated copy to clipboard function
-        function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            const textToCopy = element.textContent;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                element.style.backgroundColor = '#d4edda';
-                setTimeout(() => {
-                    element.style.backgroundColor = '';
-                }, 1000);
-            }).catch(err => {
-                console.error('Falha ao copiar: ', err);
-            });
-        }
     </script>
 </body>
 </html>
