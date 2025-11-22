@@ -185,14 +185,13 @@
             cursor: not-allowed;
         }
         
-        /* CLASSE MODIFICADA: Para ter a aparência da imagem (fundo branco, texto preto, borda amarela) */
+        /* Classe para tornar o texto do confronto maior após confirmação */
         .large-input.match-confirmed {
             font-size: 16px; 
             font-weight: bold;
-            color: var(--black-font) !important; /* Cor da fonte preta */
-            background-color: var(--text-white) !important; /* Fundo branco */
-            border: 2px solid var(--yellow-cashout); /* Borda amarela/laranja */
-            /* Remove a cor de texto padrão do estado desabilitado que pode sobrescrever */
+            color: var(--black-font) !important; 
+            background-color: var(--text-white) !important; 
+            border: 2px solid var(--yellow-cashout); 
             -webkit-text-fill-color: var(--black-font); 
         }
 
@@ -305,6 +304,17 @@
         }
         .total-box .pct-value.neg-footer {
             color: var(--red-lighter-footer); 
+        }
+
+        /* ADIÇÃO: Estilo para a nota de recomendação no rodapé (Cor Cinza Escuro) */
+        .footer-note {
+            display: block;
+            font-size: 11px;
+            font-weight: normal;
+            color: #888; /* Cinza Escuro */
+            margin-top: 8px;
+            border-top: 1px solid #2c3b47; 
+            padding-top: 5px;
         }
 
     </style>
@@ -547,7 +557,13 @@
 
             let pctClass = totalPL >= 0 ? 'pos-footer' : 'neg-footer';
 
-            totalBottomBox.innerHTML = `<span class="label-text">Cashout:</span> <span class="${totalPL >= 0 ? 'total-box-pos' : 'total-box-neg'}">R$${totalPL.toFixed(2)}</span> <span class="pct-value ${pctClass}">${pctTotalText}</span>`;
+            // ATUALIZADO: Nota de rodapé com novo formato e cor.
+            const footerNote = `<span class="footer-note">*Recomendável buscar pelo menos um lucro de 0.5% em qualquer um dos placares.</span>`;
+
+            totalBottomBox.innerHTML = 
+                `<span class="label-text">Cashout:</span> <span class="${totalPL >= 0 ? 'total-box-pos' : 'total-box-neg'}">R$${totalPL.toFixed(2)}</span> <span class="pct-value ${pctClass}">${pctTotalText}</span>`
+                + footerNote; 
+                
             totalBottomBox.classList.remove('total-box-neg', 'total-box-pos'); 
         }
 
