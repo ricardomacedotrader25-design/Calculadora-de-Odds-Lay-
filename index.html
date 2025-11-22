@@ -115,7 +115,93 @@
         /* --- TABELA E HEADERS --- */
         .main-content { display: flex; gap: 20px; width: 850px; } 
         .market-container { width: 850px; } 
-        .market-header { background: #121a23; padding: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; color: #fff; font-weight: bold; }
+        .market-header { 
+            background: #121a23; 
+            padding: 10px; 
+            border: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            color: #fff; 
+            font-weight: bold; 
+            /* ADIÇÃO: Permite quebra de linha e espaço */
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+        
+        /* --- ESTILOS para o Confronto --- */
+        .confronto-area {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: normal;
+            color: var(--neutral-text);
+        }
+
+        .confronto-label {
+            margin-right: 5px;
+            font-weight: bold;
+            color: var(--text-white);
+        }
+
+        .team-input {
+            background: var(--input-bg-default);
+            border: 1px solid var(--border-color);
+            color: var(--text-white);
+            padding: 5px 8px;
+            border-radius: 3px;
+            width: 120px;
+            font-size: 13px;
+            height: 30px;
+        }
+        .team-input::placeholder {
+            color: #807F7F;
+        }
+        
+        /* Estilo para o input longo */
+        .large-input {
+            width: 350px; 
+            min-width: 300px;
+        }
+        
+        /* Estilos para o Botão de Confirmação */
+        .confirm-button {
+            background-color: var(--green-positive); 
+            color: var(--text-white);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            margin-left: 10px;
+            height: 30px; 
+        }
+        .confirm-button:hover:not(:disabled) {
+            background-color: #2e8b23; 
+        }
+        .confirm-button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        
+        /* CLASSE MODIFICADA: Para ter a aparência da imagem (fundo branco, texto preto, borda amarela) */
+        .large-input.match-confirmed {
+            font-size: 16px; 
+            font-weight: bold;
+            color: var(--black-font) !important; /* Cor da fonte preta */
+            background-color: var(--text-white) !important; /* Fundo branco */
+            border: 2px solid var(--yellow-cashout); /* Borda amarela/laranja */
+            /* Remove a cor de texto padrão do estado desabilitado que pode sobrescrever */
+            -webkit-text-fill-color: var(--black-font); 
+        }
+
+        /* AJUSTE: Garante que o input desabilitado ainda use a cor da fonte correta e não fique opaco */
+        .large-input:disabled {
+            opacity: 1; 
+        }
+        /* --- Fim do Ajuste do Confronto --- */
+
         .market-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; }
         
         .market-table th { 
@@ -129,7 +215,25 @@
             color: var(--text-white);
         }
         .market-table td { border-bottom: 1px solid var(--border-color); height: 50px; vertical-align: middle; padding: 2px; text-align: center;}
-        .score-cell { font-weight: bold; padding-left: 10px; text-align: left; }
+        
+        /* Estilo para o campo de placar editável */
+        .score-cell { 
+            font-weight: bold; 
+            padding-left: 5px; 
+            text-align: center;
+        }
+        .score-input {
+            width: 90%; 
+            height: 35px;
+            font-weight: bold;
+            text-align: center;
+            background: var(--input-bg-default);
+            color: var(--text-white);
+            border: 1px solid var(--border-color);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        /* Fim da ADIÇÃO */
         
         .header-lay-font { color: var(--pink-lay-solid); font-weight: bold; }
         .header-back-font { color: var(--blue-back-solid); font-weight: bold; }
@@ -232,6 +336,13 @@
     <div class="main-content">
         <div class="market-container">
             <div class="market-header">
+                
+                <div class="confronto-area">
+                    <span class="confronto-label">Confronto:</span>
+                    <input type="text" id="match-name" class="team-input large-input" placeholder="Preencha com os nomes das equipes (Ex: Flamengo vs Vasco)" maxlength="100">
+                    <button class="confirm-button" id="confirm-match-btn" disabled><i class="fas fa-check"></i> OK</button>
+                </div>
+
                 <span><i class="fas fa-chart-line" style="color:var(--yellow-cashout)"></i> Calculadora de Cashout (Lay CS)</span>
             </div>
             
@@ -260,11 +371,41 @@
 
     <script>
         // --- DADOS E VARIÁVEIS ---
-        const data = ["0-1", "0-2", "1-0", "2-0"];
+        // Agora os placares são os valores iniciais, que podem ser alterados pelo input
+        const data = ["0-1", "0-2", "1-0", "2-0"]; 
         const tbody = document.getElementById("rows");
         const totalPLDisplay = document.getElementById('total-pl-display');
         const totalStakeDisplay = document.getElementById('total-stake-display');
         const totalBottomBox = document.getElementById('total');
+        
+        // Elementos do Confronto
+        const matchNameInput = document.getElementById('match-name');
+        const confirmButton = document.getElementById('confirm-match-btn');
+        
+        // Event Listeners para o Confronto
+        if (matchNameInput && confirmButton) {
+            matchNameInput.addEventListener('input', toggleConfirmButton);
+            confirmButton.addEventListener('click', confirmMatchName);
+        }
+        
+        // Funções de Confirmação do Confronto
+        function toggleConfirmButton() {
+            confirmButton.disabled = matchNameInput.value.trim() === '';
+            matchNameInput.classList.remove('match-confirmed');
+            matchNameInput.disabled = false;
+            confirmButton.innerHTML = '<i class="fas fa-check"></i> OK';
+        }
+        
+        function confirmMatchName() {
+            if (matchNameInput.value.trim() !== '') {
+                // Adiciona a classe para o estilo visual da imagem (Fundo Branco, Texto Preto, Borda Amarela)
+                matchNameInput.classList.add('match-confirmed'); 
+                // Bloqueia a edição
+                matchNameInput.disabled = true; 
+                confirmButton.disabled = true; 
+                confirmButton.innerHTML = '<i class="fas fa-lock"></i>'; 
+            }
+        }
         
         // --- FUNÇÃO DE CÁLCULO (Hedge Lay -> Back) ---
         function calc(lay, back, responsibility) {
@@ -274,22 +415,15 @@
             
             if (lay <= 1 || back <= 1 || responsibility <= 0) return { pl: 0, pct: 0, current: 0 };
 
-            // 1. Lógica de Substituição de Odd Back: 1000 => 1.000.000
             let calculatedBack = back;
             if (back === 1000) {
                 calculatedBack = 1000000; 
             }
             
-            // 2. Calcular a Stake de Lay (o lucro se o resultado NÃO ocorrer)
             const stake_lay = responsibility / (lay - 1);
-            
-            // 3. Calcular o P/L Bruto (Hedge Cash Out) - Perspectiva Lay
             const pl_bruto = stake_lay * ((calculatedBack - lay) / calculatedBack);
-            
-            // Sem comissão
             const pl_liquido = pl_bruto;
 
-            // 4. Calcular Percentual e Retorno Atual
             const pct = (pl_liquido / responsibility) * 100;
             const current = responsibility + pl_liquido;
             
@@ -304,7 +438,9 @@
                 const tr = document.createElement("tr");
 
                 tr.innerHTML = `
-                <td class="score-cell">${score}</td>
+                <td class="score-cell">
+                    <input type="text" class="score-input" value="${score}">
+                </td>
                 
                 <td><input type="number" step="0.01" class="back input-box odd-input-back" value="" placeholder="0.00" data-score="${score}"></td>
                 
@@ -335,12 +471,21 @@
         // --- FUNÇÃO LIMPAR DADOS ---
         function clearData() {
             document.querySelectorAll('tbody input').forEach(input => {
-                input.value = ''; 
+                if (!input.classList.contains('score-input')) {
+                    input.value = ''; 
+                }
             });
             document.querySelectorAll('tbody tr').forEach(tr => {
                 updateRow(tr); 
             });
             updateTotal(); 
+            
+            // Limpar e resetar campo do confronto
+            matchNameInput.value = '';
+            matchNameInput.classList.remove('match-confirmed');
+            matchNameInput.disabled = false;
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="fas fa-check"></i> OK';
         }
         window.clearData = clearData;
 
@@ -361,7 +506,6 @@
             animateChange(plCell, `R$${pl.toFixed(2)}`);
             animateChange(pctCell, `${pct.toFixed(2)}%`);
 
-            // Aqui plCell (P/L R$) usará a nova cor definida em --green-positive (#1e7b16)
             plCell.classList.toggle('value-neg', pl < 0);
             plCell.classList.toggle('value-pos', pl >= 0);
             
@@ -377,7 +521,7 @@
         // --- ATUALIZA TOTAIS ---
         function updateTotal() {
             let totalPL = 0;
-            let maxResponsibility = 0; // Variável para armazenar o MAIOR valor individual
+            let maxResponsibility = 0; 
 
             document.querySelectorAll('tbody tr').forEach(tr => {
                 const responsibility = parseFloat(tr.querySelector('.stake').value || 0);
@@ -386,11 +530,9 @@
                 
                 totalPL += pl;
                 
-                // LÓGICA DE ATUALIZAÇÃO: Encontra o maior valor de responsabilidade
                 maxResponsibility = Math.max(maxResponsibility, responsibility); 
             });
 
-            // Usa o maxResponsibility como o novo denominador para a porcentagem
             const riskForPercentage = maxResponsibility; 
             const pctTotal = riskForPercentage > 0 ? (totalPL / riskForPercentage) * 100 : 0;
             const pctTotalText = `(${pctTotal.toFixed(2)}%)`;
@@ -398,19 +540,15 @@
 
             totalPLDisplay.textContent = cashoutValueHtml;
             
-            // ATUALIZAÇÃO PRINCIPAL: Mostra o MAIOR VALOR INDIVIDUAL
             totalStakeDisplay.textContent = `R$${maxResponsibility.toFixed(2)}`; 
             
             totalPLDisplay.classList.toggle('value-neg', totalPL < 0);
             totalPLDisplay.classList.toggle('value-pos', totalPL >= 0);
 
-            // Cor do Rodapé
             let pctClass = totalPL >= 0 ? 'pos-footer' : 'neg-footer';
 
-            // ATUALIZAÇÃO DO RODAPÉ com o label "Cashout:"
-            // totalBottomBox.innerHTML usa --green-positive para o R$
             totalBottomBox.innerHTML = `<span class="label-text">Cashout:</span> <span class="${totalPL >= 0 ? 'total-box-pos' : 'total-box-neg'}">R$${totalPL.toFixed(2)}</span> <span class="pct-value ${pctClass}">${pctTotalText}</span>`;
-            totalBottomBox.classList.remove('total-box-neg', 'total-box-pos'); // Remove classes desnecessárias do container
+            totalBottomBox.classList.remove('total-box-neg', 'total-box-pos'); 
         }
 
         // --- EFEITOS VISUAIS ---
